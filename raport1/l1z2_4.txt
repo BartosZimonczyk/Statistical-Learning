@@ -1,0 +1,16 @@
+% latex table generated in R 3.6.3 by xtable 1.8-4 package
+% Tue Mar 30 18:45:39 2021
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrrr}
+  \hline
+ & 1 & 2 & 3 & 4 \\ 
+  \hline
+mean\_power\_aic & 0.948 & 0.948 & 0.948 & 0.948 \\ 
+  mean\_power\_bic & 0.654 & 0.654 & 0.654 & 0.654 \\ 
+  mean\_power\_ric & 0.722 & 0.506 & 0.324 & 0.258 \\ 
+  mean\_power\_mbic & 0.462 & 0.278 & 0.146 & 0.110 \\ 
+  mean\_power\_mbic2 & 0.544 & 0.314 & 0.166 & 0.116 \\ 
+   \hline
+\end{tabular}
+\end{table}

@@ -1,0 +1,15 @@
+% latex table generated in R 3.6.3 by xtable 1.8-4 package
+% Wed Mar 31 18:39:23 2021
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrrrrr}
+  \hline
+ & FDR & FD & TD & power & MSEy & MSEb \\ 
+  \hline
+mean\_aic & 0.571 & 40.000 & 30.000 & 1.000 & 0.499 & 65134.411 \\ 
+  mean\_bic & 0.250 & 10.000 & 30.000 & 1.000 & 0.500 & 64410.907 \\ 
+  mean\_mbic & 0.009 & 0.050 & 5.640 & 0.188 & 0.357 & 2.580 \\ 
+  mean\_mbic2 & 0.041 & 0.400 & 8.920 & 0.297 & 0.327 & 2.276 \\ 
+   \hline
+\end{tabular}
+\end{table}

@@ -1,0 +1,16 @@
+% latex table generated in R 3.6.3 by xtable 1.8-4 package
+% Tue Mar 30 18:45:39 2021
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrrr}
+  \hline
+ & 1 & 2 & 3 & 4 \\ 
+  \hline
+mean\_TD\_aic & 4.740 & 4.740 & 4.740 & 4.740 \\ 
+  mean\_TD\_bic & 3.270 & 3.270 & 3.270 & 3.270 \\ 
+  mean\_TD\_ric & 3.610 & 2.530 & 1.620 & 1.290 \\ 
+  mean\_TD\_mbic & 2.310 & 1.390 & 0.730 & 0.550 \\ 
+  mean\_TD\_mbic2 & 2.720 & 1.570 & 0.830 & 0.580 \\ 
+   \hline
+\end{tabular}
+\end{table}

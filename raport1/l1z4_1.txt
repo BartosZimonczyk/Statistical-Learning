@@ -1,0 +1,15 @@
+% latex table generated in R 3.6.3 by xtable 1.8-4 package
+% Tue Mar 30 19:24:43 2021
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrrrrrr}
+  \hline
+ & FDR & FD & TD & power & MSEy\_ls & MSEy\_rrh & MSEy\_rrb \\ 
+  \hline
+1 & 0.001 & 0.030 & 28.210 & 0.940 & 1.114 & 1.136 & 1.153 \\ 
+  2 & 0.037 & 1.130 & 29.010 & 0.967 & 1.038 & 1.063 & 1.083 \\ 
+  3 & 0.001 & 0.040 & 28.020 & 0.934 & 1.131 & 1.153 & 1.169 \\ 
+  4 & 0.030 & 0.930 & 28.960 & 0.965 & 1.048 & 1.072 & 1.092 \\ 
+   \hline
+\end{tabular}
+\end{table}

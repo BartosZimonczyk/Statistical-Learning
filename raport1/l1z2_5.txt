@@ -1,0 +1,16 @@
+% latex table generated in R 3.6.3 by xtable 1.8-4 package
+% Tue Mar 30 18:45:39 2021
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrrr}
+  \hline
+ & 1 & 2 & 3 & 4 \\ 
+  \hline
+mean\_MSEy\_aic & 0.984 & 0.937 & 0.778 & 0.778 \\ 
+  mean\_MSEy\_bic & 0.998 & 0.991 & 0.960 & 0.927 \\ 
+  mean\_MSEy\_ric & 0.995 & 1.001 & 1.010 & 1.015 \\ 
+  mean\_MSEy\_mbic & 1.006 & 1.016 & 1.027 & 1.029 \\ 
+  mean\_MSEy\_mbic2 & 1.002 & 1.013 & 1.025 & 1.029 \\ 
+   \hline
+\end{tabular}
+\end{table}

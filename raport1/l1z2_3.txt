@@ -1,0 +1,16 @@
+% latex table generated in R 3.6.3 by xtable 1.8-4 package
+% Tue Mar 30 18:45:39 2021
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrrr}
+  \hline
+ & 1 & 2 & 3 & 4 \\ 
+  \hline
+mean\_FDR\_aic & 0.295 & 0.756 & 0.932 & 0.932 \\ 
+  mean\_FDR\_bic & 0.018 & 0.179 & 0.545 & 0.712 \\ 
+  mean\_FDR\_ric & 0.025 & 0.073 & 0.128 & 0.106 \\ 
+  mean\_FDR\_mbic & 0.010 & 0.031 & 0.020 & 0.023 \\ 
+  mean\_FDR\_mbic2 & 0.008 & 0.044 & 0.026 & 0.032 \\ 
+   \hline
+\end{tabular}
+\end{table}

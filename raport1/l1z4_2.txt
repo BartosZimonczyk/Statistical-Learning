@@ -1,0 +1,15 @@
+% latex table generated in R 3.6.3 by xtable 1.8-4 package
+% Tue Mar 30 19:24:43 2021
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrr}
+  \hline
+ & MSEb\_ls & MSEb\_rrh & MSEb\_rrb \\ 
+  \hline
+1 & 0.224 & 0.213 & 0.213 \\ 
+  2 & 0.155 & 0.136 & 0.133 \\ 
+  3 & 0.244 & 0.234 & 0.233 \\ 
+  4 & 0.155 & 0.139 & 0.137 \\ 
+   \hline
+\end{tabular}
+\end{table}
