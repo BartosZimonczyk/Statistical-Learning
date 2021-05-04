@@ -99,13 +99,13 @@ file_name <- paste('r2result_task1_k', k, '.csv', sep='')
 write.csv(final_table, file=file_name)
 
 #############################################################
-# task 2
+# task 1 power computation
 
 
 p <- seq(0, 1.5, by=0.01)
-
+    
 temp <- function(x){
-  1 - pnorm(qnorm(1-0.1/2/950) - 3.5*(1+x)) + pnorm(-qnorm(1-0.1/2/950) - 3.5*(1+x))
+  1 - pnorm(qnorm(1-0.1/2/950) - 3.5/(1+x)) + pnorm(-qnorm(1-0.1/2/950) - 3.5/(1+x))
 }
 
 plot(p, temp(p), type='l', lwd=2, ylab='Power', xlab=expression(gamma))
