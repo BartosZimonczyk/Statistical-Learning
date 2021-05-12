@@ -2,6 +2,8 @@ library(glmnet)
 library(xtable)
 library(mvtnorm)
 
+set.seed(42)
+
 X <- matrix(rnorm(500*450, 0, 1/sqrt(500)), nrow=500, ncol=450)
 
 # s <- min(eigen(sigma)$values)
@@ -36,7 +38,9 @@ power_general <- function(u, b, b_hat, k, q=0.2){
   result <- sort(abs(u), decreasing = T, index.return = T)
   fd <- cumsum(u[result$ix] < 0)
   nd <- cumsum(u[result$ix] > 0)
+  
   fdr <- (fd + 1)/nd
+  
   fdp <- 0
   tp <- 0
   u1 <- which(fdr < q)
@@ -55,6 +59,18 @@ power_general <- function(u, b, b_hat, k, q=0.2){
     
   }
   return(c(tp/k, fdp))
+}
+
+find_lambda <- function(){
+  result <- sort(abs(u), decreasing = T, index.return = T)
+  fd <- cumsum(u[result$ix] < 0)
+  nd <- cumsum(u[result$ix] > 0)
+  
+  fdr <- (fd + 1)/nd
+  
+  u1 <- which(fdr < q)
+  
+  return(min(fdr[u1]))
 }
 
 for(j in 1:3){
@@ -129,7 +145,8 @@ for(j in 1:3){
     # TODO: knockoffs with ridge with FDR at level 0.2
     cat('Ridge knockoffs...\t\t')
     
-    obj_ridge_knockoffs <- cv.glmnet(cX, Y, standarize=F, intercept=F, alpha=0)
+    lambda_fdr_ridge <- 0
+    obj_ridge_knockoffs <- glmnet(cX, Y, standarize=F, intercept=F, alpha=0, lambda=lambda_fdr_ridge)
     b_hat_ridge_knockoffs <- coef(obj_ridge_knockoffs, s='lambda.min')
     bhrk <- b_hat_ridge_knockoffs
     result_ridge <- abs(bhrk[2:451]) - abs(bhrk[452:901])
@@ -144,7 +161,8 @@ for(j in 1:3){
     # TODO: knockoffs with LASSO with FDR at level 0.2
     cat('LASSO knockoffs...\t\t')
     
-    obj_lasso_knockoffs <- cv.glmnet(cX, Y, standarize=F, intercept=F)
+    lambda_fdr_lasso <- 0
+    obj_lasso_knockoffs <- glmnet(cX, Y, standarize=F, intercept=F, lambda=lambda_fdr_lasso)
     b_hat_lasso_knockoffs <- coef(obj_lasso_knockoffs, s='lambda.min')
     bhlk <- b_hat_lasso_knockoffs
     result_lasso <- abs(bhlk[2:451]) - abs(bhlk[452:901])
@@ -272,4 +290,4 @@ write.csv(df_mse_mu, file=paste(task, 'MSE_mu.csv', sep=''))
 
 cat('Results wrtitten to .csv files!\n')
 
-
+?glmnet
