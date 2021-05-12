@@ -1,4 +1,4 @@
-"","V1","V2","V3","V4","V5","V6"
-"k=5",0.06,1,NA,NA,NA,NA
-"k=20",0,1,NA,NA,NA,NA
-"k=50",0,0.996,NA,NA,NA,NA
+"","ridge_knockoffs","LASSO_knockoffs","AdaLASSO1","AdaLASSO2","AdaSLOPE","AdaBayesSLOPE"
+"k=5",0.6,1,NA,NA,NA,NA
+"k=20",0.53,0.7,NA,NA,NA,NA
+"k=50",0.412,0.568,NA,NA,NA,NA

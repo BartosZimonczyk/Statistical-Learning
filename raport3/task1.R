@@ -1,6 +1,7 @@
 library(glmnet)
 library(xtable)
 library(mvtnorm)
+library(crayon)
 
 set.seed(42)
 
@@ -13,7 +14,7 @@ X <- matrix(rnorm(500*450, 0, 1/sqrt(500)), nrow=500, ncol=450)
 # mu<-X-X%*%solve(sigma)%*%diag(sseq)
 
 # knockoffs setup, used in all knockoff scenarios
-s <- 2
+s <- 1
 sseq <- rep(s, 450)
 V <- 2 * diag(sseq) - diag(sseq) %*% diag(sseq)
 mu_knock <- X - X%*%diag(sseq)
@@ -23,7 +24,7 @@ cX <- cbind(X, Xn)
 # basic setup to perform simulations
 ks <- c(5, 20, 50)
 task <- 'task1'
-rp1 <- 100
+rp1 <- 5
 
 # TODO: for iii) - vii) estimate FDR and power
 # TODO: estimate MSE of b and mu for all apart iii)
@@ -33,45 +34,56 @@ final_table_power <- matrix(nrow=3, ncol=6)
 final_table_mse_b <- matrix(nrow=3, ncol=7)
 final_table_mse_mu <- matrix(nrow=3, ncol=7)
 
-# totaly based on prof. Bogdan idea to calculate power and FDR
-power_general <- function(u, b, b_hat, k, q=0.2){
-  result <- sort(abs(u), decreasing = T, index.return = T)
-  fd <- cumsum(u[result$ix] < 0)
-  nd <- cumsum(u[result$ix] > 0)
-  
-  fdr <- (fd + 1)/nd
-  
-  fdp <- 0
-  tp <- 0
-  u1 <- which(fdr < q)
-  if(length(u1) > 0){
-    indopt <- max(u1)
-    a1 <- result$ix[1:indopt]
-    a2 <- which(u > 0)
-    a3 <- intersect(a1, a2)
-    new_b_hat <- rep(0, 450)
-    new_b_hat[a3] <- b_hat[a3]
-    tp <- sum(abs(b[a3]) > 0)
-    fd <- length(a3) - tp
-    if(length(a3) > 0){
-      fdp <- fd/(fd+tp)
-    }
-    
-  }
-  return(c(tp/k, fdp))
+compute_fraction <- function(t, w){
+  (1 + sum(w <= -t))/sum(w >= t)
 }
 
-find_lambda <- function(){
-  result <- sort(abs(u), decreasing = T, index.return = T)
-  fd <- cumsum(u[result$ix] < 0)
-  nd <- cumsum(u[result$ix] > 0)
-  
-  fdr <- (fd + 1)/nd
-  
-  u1 <- which(fdr < q)
-  
-  return(min(fdr[u1]))
+power_general <- function(w, b, b_hat, k, q=0.2){
+  # ordered_w <- sort(abs(w), index.return=T)
+  fractions <- sapply(abs(w), compute_fraction, w=w)
+  TD <- 0
+  FD <- 0
+  FDR <- 0
+  if(length(which(fractions < q)) > 0){
+    treshold <- abs(w)[min(which(fractions < q))]
+    selected_variables <- which(w >= treshold)
+    if(length(selected_variables) > 0){
+      TD <- sum(selected_variables < k+1)
+      FD <- sum(selected_variables > k)
+      FDR <- FD/(TD+FD)
+    }
+  }
+  # power, FDR
+  return(c(TD/k, FDR))
 }
+
+# totaly based on prof. Bogdan idea to calculate power and FDR
+# power_general <- function(u, b, b_hat, k, q=0.2){
+#   result <- sort(abs(u), decreasing = T, index.return = T)
+#   fd <- cumsum(u[result$ix] < 0)
+#   nd <- cumsum(u[result$ix] > 0)
+#   
+#   fdr <- (fd + 1)/nd
+#   
+#   fdp <- 0
+#   tp <- 0
+#   u1 <- which(fdr < q)
+#   if(length(u1) > 0){
+#     indopt <- max(u1)
+#     a1 <- result$ix[1:indopt]
+#     a2 <- which(u > 0)
+#     a3 <- intersect(a1, a2)
+#     new_b_hat <- rep(0, 450)
+#     new_b_hat[a3] <- b_hat[a3]
+#     tp <- sum(abs(b[a3]) > 0)
+#     fd <- length(a3) - tp
+#     if(length(a3) > 0){
+#       fdp <- fd/(fd+tp)
+#     }
+#     
+#   }
+#   return(c(tp/k, fdp))
+# }
 
 for(j in 1:3){
   # creating new beta for each value of k
@@ -100,15 +112,16 @@ for(j in 1:3){
   # 7. adaptive Bayesian SLOPE
   mse_b_matrix <- matrix(nrow=rp1, ncol=7)
   mse_mu_matrix <- matrix(nrow=rp1, ncol=7)
-  cat('Currently at k =', k, '\n')
+  cat(bold(blue('\nCurrently at k =', k, '\n')))
   for(i in 1:rp1){
-    cat('\nCurrent iteration:', i, '\n')
+    cat('\nCurrent iteration:', bold(i), '\n')
     eps <- 2*rnorm(500)
     Y <- X %*% b + eps
     
     # i)
     # TODO: least squares regression
     cat('OLS...\t\t\t\t')
+    start_time_ols <- proc.time()[3]
     
     obj_ols <- lm(Y~X-1)
     b_hat_ols <- summary(obj_ols)$coefficients[,1]
@@ -116,11 +129,13 @@ for(j in 1:3){
     mse_b_matrix[i, 1] <- sum((b_hat_ols - b)^2)
     mse_mu_matrix[i, 1] <- sum((X %*% (b_hat_ols - b))^2)
     
-    cat('DONE\n')
+    elapsed <- proc.time()[3] - start_time_ols
+    cat(green('DONE\t'), round(elapsed, 3), '\n')
     
     # ii)
     # TODO: ridge with tuning parameter selected by CV
     cat('Ridge...\t\t\t')
+    start_time_ridge <- proc.time()[3]
     
     obj_ridge <- cv.glmnet(X, Y, standarize=F, intercept=F, alpha=0)
     b_hat_ridge <- coef(obj_ridge, s='lambda.min')[2:451]
@@ -128,10 +143,12 @@ for(j in 1:3){
     mse_b_matrix[i, 2] <- sum((b_hat_ridge - b)^2)
     mse_mu_matrix[i, 2] <- sum((X %*% (b_hat_ridge - b))^2)
     
-    cat('DONE\n')
+    elapsed <- proc.time()[3] - start_time_ridge
+    cat(green('DONE\t'), round(elapsed, 3), '\n')
     
     # TODO: LASSO with tuning parameters selected by CV
     cat('LASSO...\t\t\t')
+    start_time_lasso <- proc.time()[3]
     
     obj_lasso <- cv.glmnet(X, Y, standarize=F, intercept=F)
     b_hat_lasso <- coef(obj_ridge, s='lambda.min')[2:451]
@@ -139,85 +156,96 @@ for(j in 1:3){
     mse_b_matrix[i, 3] <- sum((b_hat_lasso - b)^2)
     mse_mu_matrix[i, 3] <- sum((X %*% (b_hat_lasso - b))^2)
     
-    cat('DONE\n')
+    elapsed <- proc.time()[3] - start_time_lasso
+    cat(green('DONE\t'), round(elapsed, 3), '\n')
     
     # iii)
     # TODO: knockoffs with ridge with FDR at level 0.2
     cat('Ridge knockoffs...\t\t')
+    start_time_rk <- proc.time()[3]
     
-    lambda_fdr_ridge <- 0
-    obj_ridge_knockoffs <- glmnet(cX, Y, standarize=F, intercept=F, alpha=0, lambda=lambda_fdr_ridge)
+    obj_ridge_knockoffs <- cv.glmnet(cX, Y, standarize=F, intercept=F, alpha=0)
     b_hat_ridge_knockoffs <- coef(obj_ridge_knockoffs, s='lambda.min')
     bhrk <- b_hat_ridge_knockoffs
-    result_ridge <- abs(bhrk[2:451]) - abs(bhrk[452:901])
+    w_ridge <- abs(bhrk[2:451]) - abs(bhrk[452:901])
     
-    res_stats_ridge <- power_general(result_ridge, b, b_hat_ridge, k, q=0.2)
+    res_stats_ridge <- power_general(w_ridge, b, b_hat_ridge, k, q=0.2)
     
     fdr_matrix[i, 1] <- res_stats_ridge[2]
     power_matrix[i, 1] <- res_stats_ridge[1]
     
-    cat('DONE\n')
+    elapsed <- proc.time()[3] - start_time_rk
+    cat(green('DONE\t'), round(elapsed, 3), '\n')
     
     # TODO: knockoffs with LASSO with FDR at level 0.2
     cat('LASSO knockoffs...\t\t')
+    start_time_lk <- proc.time()[3]
     
-    lambda_fdr_lasso <- 0
-    obj_lasso_knockoffs <- glmnet(cX, Y, standarize=F, intercept=F, lambda=lambda_fdr_lasso)
+    obj_lasso_knockoffs <- cv.glmnet(cX, Y, standarize=F, intercept=F)
     b_hat_lasso_knockoffs <- coef(obj_lasso_knockoffs, s='lambda.min')
     bhlk <- b_hat_lasso_knockoffs
-    result_lasso <- abs(bhlk[2:451]) - abs(bhlk[452:901])
+    w_lasso <- abs(bhlk[2:451]) - abs(bhlk[452:901])
     
-    res_stats_lasso <- power_general(result_lasso, b, b_hat_lasso, k, q=0.2)
+    res_stats_lasso <- power_general(w_lasso, b, b_hat_lasso, k, q=0.2)
     
     fdr_matrix[i, 2] <- res_stats_lasso[2]
     power_matrix[i, 2] <- res_stats_lasso[1]
     
-    cat('DONE\n')
+    elapsed <- proc.time()[3] - start_time_lk
+    cat(green('DONE\t'), round(elapsed, 3), '\n')
     
     # iv)
     # TODO: Adaptive LASSO I
     cat('Adaptive LASSO I...\t\t')
+    start_time_al1 <- proc.time()[3]
     
     fdr_matrix[i, 3] <- NA_real_
     power_matrix[i, 3] <- NA_real_
     mse_b_matrix[i, 4] <- NA_real_
     mse_mu_matrix[i, 4] <- NA_real_
     
-    cat('DONE\n')
+    elapsed <- proc.time()[3] - start_time_al1
+    cat(green('DONE\t'), round(elapsed, 3), '\n')
     
     # v)
     # TODO: Adaptive LASSO II
     cat('Adaptive LASSO II...\t\t')
+    start_time_al2 <- proc.time()[3]
     
     fdr_matrix[i, 4] <- NA_real_
     power_matrix[i, 4] <- NA_real_
     mse_b_matrix[i, 5] <- NA_real_
     mse_mu_matrix[i, 5] <- NA_real_
     
-    cat('DONE\n')
+    elapsed <- proc.time()[3] - start_time_al2
+    cat(green('DONE\t'), round(elapsed, 3), '\n')
     
     # vi)
     # TODO: Adaptive SLOPE, keep FDR at level 0.2
     cat('Adaptive SLOPE...\t\t')
+    start_time_slope <- proc.time()[3]
     
     fdr_matrix[i, 5] <- NA_real_
     power_matrix[i, 5] <- NA_real_
     mse_b_matrix[i, 6] <- NA_real_
     mse_mu_matrix[i, 6] <- NA_real_
     
-    cat('DONE\n')
+    elapsed <- proc.time()[3] - start_time_slope
+    cat(green('DONE\t'), round(elapsed, 3), '\n')
     
     # vii)
     # For extra points +5, tempting
     # TODO: Adaptive Bayesian SLOPE with FDR at level 0.2
     cat('Adaptive Bayesian SLOPE...\t')
+    start_time_abslope <- proc.time()[3]
     
     fdr_matrix[i, 6] <- NA_real_
     power_matrix[i, 6] <- NA_real_
     mse_b_matrix[i, 7] <- NA_real_
     mse_mu_matrix[i, 7] <- NA_real_
     
-    cat('DONE\n')
+    elapsed <- proc.time()[3] - start_time_abslope
+    cat(green('DONE\t'), round(elapsed, 3), '\n')
   }
   final_table_fdr[j, ] <- apply(fdr_matrix, 2, mean)
   final_table_power[j, ] <- apply(power_matrix, 2, mean)
@@ -289,5 +317,3 @@ write.csv(df_mse_b, file=paste(task, 'MSE_b.csv', sep=''))
 write.csv(df_mse_mu, file=paste(task, 'MSE_mu.csv', sep=''))
 
 cat('Results wrtitten to .csv files!\n')
-
-?glmnet
