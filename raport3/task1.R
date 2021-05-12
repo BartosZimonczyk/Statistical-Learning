@@ -38,52 +38,57 @@ compute_fraction <- function(t, w){
   (1 + sum(w <= -t))/sum(w >= t)
 }
 
-power_general <- function(w, b, b_hat, k, q=0.2){
-  # ordered_w <- sort(abs(w), index.return=T)
-  fractions <- sapply(abs(w), compute_fraction, w=w)
-  TD <- 0
-  FD <- 0
-  FDR <- 0
-  if(length(which(fractions < q)) > 0){
-    treshold <- abs(w)[min(which(fractions < q))]
-    selected_variables <- which(w >= treshold)
-    if(length(selected_variables) > 0){
-      TD <- sum(selected_variables < k+1)
-      FD <- sum(selected_variables > k)
-      FDR <- FD/(TD+FD)
-    }
-  }
-  # power, FDR
-  return(c(TD/k, FDR))
-}
+# my own way to estimate threshold statistic
+# it looks promising, but I am not sure
+# moreover prof. Bogdan code is working as well,
+# so I will stick to it
+
+# power_general <- function(w, b, b_hat, k, q=0.2){
+#   # ordered_w <- sort(abs(w), index.return=T)
+#   fractions <- sapply(abs(w), compute_fraction, w=w)
+#   TD <- 0
+#   FD <- 0
+#   FDR <- 0
+#   if(length(which(fractions < q)) > 0){
+#     treshold <- abs(w)[min(which(fractions < q))]
+#     selected_variables <- which(w >= treshold)
+#     if(length(selected_variables) > 0){
+#       TD <- sum(selected_variables < k+1)
+#       FD <- sum(selected_variables > k)
+#       FDR <- FD/(TD+FD)
+#     }
+#   }
+#   # power, FDR
+#   return(c(TD/k, FDR))
+# }
 
 # totaly based on prof. Bogdan idea to calculate power and FDR
-# power_general <- function(u, b, b_hat, k, q=0.2){
-#   result <- sort(abs(u), decreasing = T, index.return = T)
-#   fd <- cumsum(u[result$ix] < 0)
-#   nd <- cumsum(u[result$ix] > 0)
-#   
-#   fdr <- (fd + 1)/nd
-#   
-#   fdp <- 0
-#   tp <- 0
-#   u1 <- which(fdr < q)
-#   if(length(u1) > 0){
-#     indopt <- max(u1)
-#     a1 <- result$ix[1:indopt]
-#     a2 <- which(u > 0)
-#     a3 <- intersect(a1, a2)
-#     new_b_hat <- rep(0, 450)
-#     new_b_hat[a3] <- b_hat[a3]
-#     tp <- sum(abs(b[a3]) > 0)
-#     fd <- length(a3) - tp
-#     if(length(a3) > 0){
-#       fdp <- fd/(fd+tp)
-#     }
-#     
-#   }
-#   return(c(tp/k, fdp))
-# }
+power_general <- function(u, b, b_hat, k, q=0.2){
+  result <- sort(abs(u), decreasing = T, index.return = T)
+  fd <- cumsum(u[result$ix] < 0)
+  nd <- cumsum(u[result$ix] > 0)
+
+  fdr <- (fd + 1)/nd
+
+  fdp <- 0
+  tp <- 0
+  u1 <- which(fdr < q)
+  if(length(u1) > 0){
+    indopt <- max(u1)
+    a1 <- result$ix[1:indopt]
+    a2 <- which(u > 0)
+    a3 <- intersect(a1, a2)
+    new_b_hat <- rep(0, 450)
+    new_b_hat[a3] <- b_hat[a3]
+    tp <- sum(abs(b[a3]) > 0)
+    fd <- length(a3) - tp
+    if(length(a3) > 0){
+      fdp <- fd/(fd+tp)
+    }
+
+  }
+  return(c(tp/k, fdp))
+}
 
 for(j in 1:3){
   # creating new beta for each value of k
