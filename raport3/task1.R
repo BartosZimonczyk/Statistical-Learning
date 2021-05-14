@@ -264,16 +264,16 @@ for(j in 1:3){
         # for this case we will reuse LASSO and AdaLASSOs setups
         # to reduce computations
         
-        weights_slope <- abs(b_hat_lasso)/sigma_alasso_2
-        X_slope <- sweep(X, 2, weights_slope, '*')
+        weights_aslope <- abs(b_hat_lasso)/sigma_alasso_2
+        X_aslope <- sweep(X, 2, weights_aslope, '*')
         
         obj_aslope <- SLOPE(
-          X_slope, Y, q=0.2, lambda='bh', solver='admm',
+          X_aslope, Y, q=0.2, lambda='bh', solver='admm',
           max_passes=100, scale = 'none', alpha = sigma_alasso_2/500
         )
         
         b_hat_aslope <- rep(0, 450)
-        b_hat_aslope[ind_selected_lasso] <- coef(obj_aslope)[2:(p_alasso_1+1)]
+        b_hat_aslope[ind_selected_lasso] <- coef(obj_aslope)[2:(p_alasso_1+1)] * weights_aslope
         ind_selected_aslope <- which(abs(b_hat_aslope) > 0)
         
         fdr_matrix[i, 5] <- sum(ind_selected_aslope > k)/max(1, length(ind_selected_aslope))
