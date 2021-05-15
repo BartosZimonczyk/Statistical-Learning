@@ -1,4 +1,4 @@
 "","ridge_knockoffs","LASSO_knockoffs","AdaLASSO1","AdaLASSO2","AdaSLOPE","AdaBayesSLOPE"
-"k=5",0.6,1,NA,NA,NA,NA
-"k=20",0.61,0.97,NA,NA,NA,NA
-"k=50",0.596,0.98,NA,NA,NA,NA
+"k=5",0.214,0.444,0.996,0.992,0.956,NA
+"k=20",0.7545,0.9705,0.999,0.997,0.987,NA
+"k=50",0.6142,0.9464,0.9976,0.9962,0.9814,NA
