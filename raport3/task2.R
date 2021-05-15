@@ -3,6 +3,7 @@ library(xtable)
 library(mvtnorm)
 library(crayon)
 library(SLOPE)
+source('SLOBEC_BH.R')
 
 set.seed(42)
 
